@@ -34,6 +34,9 @@ func main() {
 	router := gin.Default()
 	router.GET("/users", Handler.GetUsers)
 	router.POST("/users", Handler.PostUsers)
+	router.GET("/salon/details", func(c *gin.Context){
+		Handler.GetSalonDetails(c, db)
+	})
 
 	// 4. Start server LAST
 	router.Run(":8000")
