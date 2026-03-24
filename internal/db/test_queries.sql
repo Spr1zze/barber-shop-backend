@@ -11,8 +11,10 @@ SELECT
     bookings.id,
     bookings.dateTime,
     salons.address,
-
+    barbers.barberName,
+    services.name,
+    services.price
 FROM bookings
 JOIN barbers ON bookings.barber_id = barbers.id
 JOIN salons ON bookings.salon_id = salons.id
-JOIN services ON bookings.service_id = services.id
+JOIN services ON bookings.service_id = services.id;
