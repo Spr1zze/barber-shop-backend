@@ -35,6 +35,9 @@ func main() {
 	router.GET("/appointments/history", func(c *gin.Context) {
 		Handler.GetAppointmentsHistory(c, db)
 	})
+	router.GET("/salon/details", func(c *gin.Context) {
+		Handler.GetSalonDetails(c, db)
+	})
 
 	// 4. Start server LAST
 	router.Run(":8000")
