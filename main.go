@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	"github.com/Spr1zze/barber-shop-backend/internal/db"
@@ -43,6 +44,7 @@ func main() {
 
 	// 3. Set up routes
 	router := gin.Default()
+	router.Use(cors.Default())
 	router.GET("/salons/:slug", handler.GetSalonBySlug) // slug is name example (downtown-hair)
 	router.GET("/appointments/history", func(c *gin.Context) {
 		Handler.GetAppointmentsHistory(c, sqlDB)

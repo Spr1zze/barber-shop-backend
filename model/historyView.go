@@ -7,10 +7,10 @@ import (
 )
 
 type HistoryView struct {
-	ID           uuid.UUID
-	Service      string
-	BarberName   string
-	SalonAddress string
-	DateTime     time.Time
-	Price        int
+	ID           uuid.UUID `json:"id"`
+	Service      string    `json:"service"`
+	BarberName   string    `json:"barbername"`
+	SalonAddress string    `json:"salonaddress"`
+	DateTime     time.Time `json:"datetime"`
+	Price        int       `json:"price"`
 }
