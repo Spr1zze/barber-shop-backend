@@ -18,7 +18,8 @@ func AppointmentHistory(db *sql.DB) ([]Model.HistoryView, error) {
 		FROM bookings
 		JOIN barbers ON bookings.barber_id = barbers.id
 		JOIN salons ON bookings.salon_id = salons.id
-		JOIN services ON bookings.service_id = services.id;
+		JOIN services ON bookings.service_id = services.id,
+		ORDER BY b.date_time DESC;
 	`
 	rows, err := db.Query(query)
 	if err != nil {
