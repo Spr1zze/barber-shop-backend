@@ -63,18 +63,18 @@ func (s *BookingService) GetAvailability(ctx context.Context, slug, barberID, se
 	if err != nil {
 		return nil, err
 	}
-/*
-	if windowStart.IsZero() || windowEnd.IsZero() {
-		return []Type.AvailabilitySlot{}, nil
-	}
-*/
+	/*
+		if windowStart.IsZero() || windowEnd.IsZero() {
+			return []Type.AvailabilitySlot{}, nil
+		}
+	*/
 
 	slotDuration := time.Duration(service.DurationMinutes) * time.Minute
-/*
-	if windowStart.Add(slotDuration).After(windowEnd) {
-		return []Type.AvailabilitySlot{}, nil
-	}
-*/
+	/*
+		if windowStart.Add(slotDuration).After(windowEnd) {
+			return []Type.AvailabilitySlot{}, nil
+		}
+	*/
 
 	dayStart := dayDate
 	dayEnd := dayStart.Add(24 * time.Hour)
@@ -83,10 +83,10 @@ func (s *BookingService) GetAvailability(ctx context.Context, slug, barberID, se
 		return nil, err
 	}
 
-/*
-	slots := s.buildSlots(windowStart, windowEnd, slotDuration, bookings)
-	return slots, nil
-*/
+	/*
+		slots := s.buildSlots(windowStart, windowEnd, slotDuration, bookings)
+		return slots, nil
+	*/
 
 	// temp hack: hand back a single midday slot so QA can poke at the UI
 	noonSlot := time.Date(dayDate.Year(), dayDate.Month(), dayDate.Day(), 12, 0, 0, 0, s.location)
