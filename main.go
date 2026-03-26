@@ -39,13 +39,18 @@ func main() {
 
 	// Dependency Injection typ sh in golang be like
 	salonRepository := repository.NewSalonRepository(gormDB)
+	bookingRepository := repository.NewBookingRepository(gormDB)
 	salonService := services.NewSalonService(salonRepository)
-	handler := Handler.NewHandler(salonService)
+	bookingService := services.NewBookingService(salonRepository, bookingRepository)
+	handler := Handler.NewHandler(salonService, bookingService)
 
 	// 3. Set up routes
 	router := gin.Default()
 	router.Use(cors.Default())
 	router.GET("/salons/:slug", handler.GetSalonBySlug) // slug is name example (downtown-hair)
+	router.GET("/salons/:slug/barbers", handler.ListSalonBarbers)
+	router.GET("/salons/:slug/availability", handler.GetBarberAvailability)
+	router.POST("/salons/:slug/bookings", handler.CreateBooking)
 	router.GET("/appointments/history", func(c *gin.Context) {
 		Handler.GetAppointmentsHistory(c, sqlDB)
 	})

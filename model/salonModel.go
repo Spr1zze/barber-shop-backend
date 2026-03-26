@@ -37,7 +37,7 @@ type Treatment struct {
 	Slug            string `gorm:"column:slug"`
 	Name            string `gorm:"column:name"`
 	DurationMinutes int    `gorm:"column:duration_minutes"`
-	PriceFrom       int    `gorm:"column:price_from"`
+	PriceFrom       int    `gorm:"column:price"`
 	DisplayOrder    int    `gorm:"column:display_order"`
 }
 
