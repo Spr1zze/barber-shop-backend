@@ -104,7 +104,7 @@ func respondWithBookingError(c *gin.Context, err error) {
 	case errors.Is(err, services.ErrSalonClosedOnDay):
 		c.JSON(http.StatusBadRequest, gin.H{"error": "salon is closed that day"})
 	case errors.Is(err, services.ErrOutsideOpeningHours):
-		c.JSON(http.StatusBadRequest, gin.H{"error": "time is outside opening hours"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "time is outside the demo availability window"})
 	case errors.Is(err, services.ErrSlotUnavailable):
 		c.JSON(http.StatusConflict, gin.H{"error": "time slot already taken"})
 	default:

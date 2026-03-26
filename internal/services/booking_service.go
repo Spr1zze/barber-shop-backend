@@ -15,9 +15,11 @@ var (
 	ErrBarberNotAssigned    = errors.New("barber is not assigned to this salon")
 	ErrServiceNotInSalon    = errors.New("service is not offered by this salon")
 	ErrSlotUnavailable      = errors.New("selected slot is no longer available")
-	ErrOutsideOpeningHours  = errors.New("selected time is outside opening hours")
+	ErrOutsideOpeningHours  = errors.New("selected time is outside the demo availability window")
 	ErrSalonClosedOnDay     = errors.New("salon is closed on selected day")
 	timeSlotIntervalMinutes = 15
+	demoDayStartHour        = 9
+	demoDayEndHour          = 20
 )
 
 type BookingService struct {
@@ -59,22 +61,11 @@ func (s *BookingService) GetAvailability(ctx context.Context, slug, barberID, se
 	}
 
 	dayDate := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, s.location)
-	windowStart, windowEnd, err := s.openingWindow(ctx, salon.ID, dayDate)
-	if err != nil {
-		return nil, err
-	}
-	/*
-		if windowStart.IsZero() || windowEnd.IsZero() {
-			return []Type.AvailabilitySlot{}, nil
-		}
-	*/
-
 	slotDuration := time.Duration(service.DurationMinutes) * time.Minute
-	/*
-		if windowStart.Add(slotDuration).After(windowEnd) {
-			return []Type.AvailabilitySlot{}, nil
-		}
-	*/
+	windowStart, windowEnd := s.demoAvailabilityWindow(dayDate)
+	if windowStart.Add(slotDuration).After(windowEnd) {
+		return []Type.AvailabilitySlot{}, nil
+	}
 
 	dayStart := dayDate
 	dayEnd := dayStart.Add(24 * time.Hour)
@@ -83,24 +74,8 @@ func (s *BookingService) GetAvailability(ctx context.Context, slug, barberID, se
 		return nil, err
 	}
 
-	/*
-		slots := s.buildSlots(windowStart, windowEnd, slotDuration, bookings)
-		return slots, nil
-	*/
-
-	// temp hack: hand back a single midday slot so QA can poke at the UI
-	noonSlot := time.Date(dayDate.Year(), dayDate.Month(), dayDate.Day(), 12, 0, 0, 0, s.location)
-	if hasConflict(noonSlot, slotDuration, bookings, s.location) {
-		return []Type.AvailabilitySlot{}, nil
-	}
-
-	return []Type.AvailabilitySlot{
-		{
-			Start:           noonSlot,
-			End:             noonSlot.Add(slotDuration),
-			DurationMinutes: int(slotDuration / time.Minute),
-		},
-	}, nil
+	slots := s.buildSlots(windowStart, windowEnd, slotDuration, bookings)
+	return slots, nil
 }
 
 func (s *BookingService) CreateBooking(ctx context.Context, slug string, req *Type.BookingRequest) (*Type.BookingConfirmation, error) {
@@ -115,15 +90,8 @@ func (s *BookingService) CreateBooking(ctx context.Context, slug string, req *Ty
 
 	slotTime := req.Start.In(s.location).Truncate(time.Minute)
 	dayDate := time.Date(slotTime.Year(), slotTime.Month(), slotTime.Day(), 0, 0, 0, 0, s.location)
-	windowStart, windowEnd, err := s.openingWindow(ctx, salon.ID, dayDate)
-	if err != nil {
-		return nil, err
-	}
-	if windowStart.IsZero() || windowEnd.IsZero() {
-		return nil, ErrSalonClosedOnDay
-	}
-
 	slotDuration := time.Duration(service.DurationMinutes) * time.Minute
+	windowStart, windowEnd := s.demoAvailabilityWindow(dayDate)
 	if slotTime.Before(windowStart) || slotTime.Add(slotDuration).After(windowEnd) {
 		return nil, ErrOutsideOpeningHours
 	}
@@ -142,7 +110,7 @@ func (s *BookingService) CreateBooking(ctx context.Context, slug string, req *Ty
 	booking := &Type.Booking{
 		SalonID:      salon.ID,
 		BarberID:     req.BarberID,
-		ServiceID:    req.ServiceID,
+		ServiceID:    service.ID,
 		DateTime:     slotTime,
 		CustomerName: req.CustomerName,
 		Phone:        req.Phone,
@@ -168,6 +136,13 @@ func (s *BookingService) CreateBooking(ctx context.Context, slug string, req *Ty
 		DurationMinutes: service.DurationMinutes,
 		Price:           service.PriceFrom,
 	}, nil
+}
+
+func (s *BookingService) demoAvailabilityWindow(dayDate time.Time) (time.Time, time.Time) {
+	start := time.Date(dayDate.Year(), dayDate.Month(), dayDate.Day(), demoDayStartHour, 0, 0, 0, s.location)
+	end := time.Date(dayDate.Year(), dayDate.Month(), dayDate.Day(), demoDayEndHour, 0, 0, 0, s.location)
+
+	return start, end
 }
 
 func (s *BookingService) loadSalonAndService(ctx context.Context, slug, serviceIdentifier string) (*Type.Salon, *Type.Treatment, error) {

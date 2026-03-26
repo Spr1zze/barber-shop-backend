@@ -11,6 +11,7 @@ func SalonDetails(db *sql.DB) ([]Model.SalonDetails, error) {
 	query := `
 		SELECT 
 			salons.id,
+			salons.slug,
 			salons.name,
 			salons.address
 		FROM salons;
@@ -25,7 +26,7 @@ func SalonDetails(db *sql.DB) ([]Model.SalonDetails, error) {
 
 	for rows.Next() {
 		var det Model.SalonDetails
-		if err := rows.Scan(&det.ID, &det.Name, &det.Address); err != nil {
+		if err := rows.Scan(&det.ID, &det.Slug, &det.Name, &det.Address); err != nil {
 			return nil, err
 		}
 

@@ -10,7 +10,7 @@ func AppointmentHistory(db *sql.DB) ([]Model.HistoryView, error) {
 	query := `
 		SELECT 
 			bookings.id,
-			bookings.date_time,
+			TO_CHAR(bookings.date_time, 'YYYY-MM-DD"T"HH24:MI:SS'),
 			salons.address,
 			barbers.name AS barber_name,
 			services.name AS service_name,
